@@ -4,21 +4,19 @@ import SunIcon from '../assets/sun.svg';
 import MoonIcon from '../assets/moon.svg';
 import SettingsIcon from '../assets/settings.svg';
 import SendIcon from './SendIcon';
-// import SparkleIcon from './SparkleIcon'; // Removed based on request
 
-// --- SNOWFALL COMPONENT (Optimized & Subtler) ---
+// --- SNOWFALL ---
 const Snowfall = () => {
-  const snowflakes = Array.from({ length: 30 }).map((_, i) => { // Reduced count for performance
+  const snowflakes = Array.from({ length: 30 }).map((_, i) => { 
     const style = {
       left: `${Math.random() * 100}%`,
-      animationDuration: `${Math.random() * 10 + 10}s`, // Slower fall
+      animationDuration: `${Math.random() * 10 + 10}s`,
       animationDelay: `${Math.random() * 5}s`,
-      opacity: Math.random() * 0.3 + 0.1, // More subtle opacity
+      opacity: Math.random() * 0.3 + 0.1,
       fontSize: `${Math.random() * 10 + 5}px`,
     };
     return <div key={i} className="snowflake" style={style}>❄</div>;
   });
-
   return <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">{snowflakes}</div>;
 };
 
@@ -80,13 +78,12 @@ function Chat({ user, handleLogout }) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // --- ENHANCED THEME CLASSES ---
   const themeClasses = {
     dark: {
-      bg: 'bg-[#0f1012]', // Darker base
+      bg: 'bg-[#0f1012]', 
       text: 'text-[#E3E3E3]',
       sidebar: 'bg-[#18191b] border-r border-[#2d2f31]',
-      header: 'bg-[#0f1012]/80 backdrop-blur-md border-b border-[#2d2f31]', // Glass effect
+      header: 'bg-[#0f1012]/80 backdrop-blur-md border-b border-[#2d2f31]', 
       userBubble: 'bg-gradient-to-br from-[#2b2d31] to-[#1e1f21] text-[#E3E3E3] rounded-2xl rounded-tr-sm shadow-sm border border-white/5',
       botBubble: 'text-[#E3E3E3] pl-0', 
       inputContainer: 'bg-[#1e1f21] border border-[#3c4043] rounded-[24px] shadow-lg', 
@@ -101,7 +98,7 @@ function Chat({ user, handleLogout }) {
       bg: 'bg-white',
       text: 'text-[#1F1F1F]',
       sidebar: 'bg-[#f8f9fa] border-r border-gray-200',
-      header: 'bg-white/80 backdrop-blur-md border-b border-gray-100', // Glass effect
+      header: 'bg-white/80 backdrop-blur-md border-b border-gray-100', 
       userBubble: 'bg-gradient-to-br from-[#f0f4f9] to-[#e1e5ea] text-[#1F1F1F] rounded-2xl rounded-tr-sm shadow-sm',
       botBubble: 'text-[#1F1F1F] pl-0',
       inputContainer: 'bg-[#f0f4f9] border-none rounded-[24px] shadow-sm',
@@ -268,8 +265,13 @@ function Chat({ user, handleLogout }) {
                     {showSettings && (
                         <div className={`absolute bottom-12 left-0 w-56 rounded-xl py-2 ${currentTheme.dropdown} z-50 animate-fade-in-up`}>
                             <div className="px-4 py-3 text-xs opacity-60 border-b border-gray-500/20 mb-1">
-                                <p className="font-semibold text-sm opacity-100 mb-0.5">User Account</p>
-                                {user.email}
+                                <div className="flex items-center gap-3 mb-3">
+                                    <img src={user?.picture} alt="Profile" className="w-10 h-10 rounded-full object-cover" />
+                                    <div>
+                                        <p className="font-semibold text-sm opacity-100 mb-0.5">{user?.name}</p>
+                                        <p className="text-xs opacity-70">{user.email}</p>
+                                    </div>
+                                </div>
                             </div>
                             <button onClick={handleLogout} className="w-full text-left px-4 py-2.5 text-sm text-red-400 hover:bg-red-500/10 flex items-center gap-2 transition-colors">
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
@@ -292,14 +294,14 @@ function Chat({ user, handleLogout }) {
 
                 <div className="flex items-center gap-2 cursor-pointer opacity-90 hover:opacity-100 transition-opacity">
                     <span className="text-lg font-semibold tracking-tight">PGAS Assistant</span>
-                    <span className="text-[10px] px-1.5 py-0.5 rounded border border-blue-500/30 text-blue-500 font-medium">BETA</span>
                 </div>
             </div>
             
+            {/* --- HEADER PROFILE PIC FROM GOOGLE --- */}
             <img 
-                src={PgasLogo} 
+                src={user?.picture || PgasLogo} 
                 alt="Profile" 
-                className="w-8 h-8 rounded-full bg-white p-0.5 border border-gray-500/30 object-contain shadow-sm cursor-pointer hover:scale-105 transition-transform" 
+                className="w-9 h-9 rounded-full bg-white p-0.5 border border-gray-500/30 object-cover shadow-sm cursor-pointer hover:scale-105 transition-transform" 
             />
           </header>
 
@@ -322,7 +324,9 @@ function Chat({ user, handleLogout }) {
                   <div className="flex flex-col items-start mt-8 animate-message">
                       <div className="mb-8">
                         <h1 className="text-5xl md:text-6xl font-medium tracking-tight mb-2">
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#4285F4] via-[#9B72CB] to-[#D96570]">Hello, {user.given_name || user.name}</span>
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#4285F4] via-[#9B72CB] to-[#D96570]">
+                                Hello, {user?.given_name || 'User'}
+                            </span>
                         </h1>
                         <h2 className={`text-4xl md:text-5xl font-medium ${theme === 'dark' ? 'text-[#444746]' : 'text-[#C4C7C5]'}`}>
                             How can I help you today?
@@ -351,15 +355,22 @@ function Chat({ user, handleLogout }) {
               {messages.map((msg, index) => (
                 <div key={index} className="mb-6 w-full group animate-message">
                   {msg.sender === 'user' ? (
-                      <div className="flex justify-end">
+                      <div className="flex justify-end gap-3 items-start">
+                          {/* USER BUBBLE */}
                           <div className={`px-5 py-3.5 text-[15px] leading-relaxed max-w-[85%] md:max-w-[70%] whitespace-pre-wrap ${currentTheme.userBubble}`}>
                               {formatMessage(msg.text)}
                           </div>
+                          {/* --- USER AVATAR FROM GOOGLE --- */}
+                          <img 
+                            src={user?.picture || PgasLogo} 
+                            alt="Me" 
+                            className="w-8 h-8 rounded-full bg-gray-200 object-cover shadow-sm mt-1" 
+                          />
                       </div>
                   ) : (
                       <div className="flex gap-4 items-start w-full pr-4 md:pr-12">
                           <div className="flex-shrink-0 mt-1">
-                              {/* --- PGAS LOGO as Bot Avatar (Strictly followed) --- */}
+                              {/* --- PGAS LOGO as Bot Avatar --- */}
                               <img src={PgasLogo} alt="PGAS Bot" className="w-8 h-8 rounded-full bg-white p-0.5 shadow-md object-contain border border-gray-200" />
                           </div>
                           <div className={`flex-1 text-[16px] leading-7 font-light tracking-wide ${currentTheme.botBubble}`}>
@@ -387,7 +398,6 @@ function Chat({ user, handleLogout }) {
           <footer className={`absolute bottom-0 left-0 w-full pb-6 pt-2 px-4 z-40 bg-gradient-to-t ${theme === 'dark' ? 'from-[#0f1012] via-[#0f1012] to-transparent' : 'from-white via-white to-transparent'}`}>
             <div className="max-w-[850px] mx-auto">
               <div className={`relative flex items-end w-full px-4 py-3 transition-all duration-200 ${currentTheme.inputContainer}`}>
-                {/* Floating Action Button Style Input */}
                 
                 <button type="button" className={`p-2 mb-0.5 rounded-full mr-1 hover:bg-gray-500/20 transition-colors ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4"/></svg>
@@ -414,7 +424,7 @@ function Chat({ user, handleLogout }) {
                         <SendIcon />
                     </button>
                 ) : (
-                    <div className="w-10"></div> // Spacer to keep layout stable
+                    <div className="w-10"></div> 
                 )}
               </div>
               <p className="text-center text-[10px] mt-3 opacity-50 font-medium">
