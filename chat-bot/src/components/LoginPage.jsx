@@ -1,14 +1,13 @@
 import React from 'react';
+import { GoogleLogin } from '@react-oauth/google';
 import PgasLogo from '../assets/pgas.png'; 
-import PimoLogo from '../assets/pimo.png'; 
 
-function LoginPage({ handleLogin }) {
+function LoginPage({ onLoginSuccess }) {
   return (
     <>
       {/* --- CSS ANIMATIONS --- */}
       <style>
         {`
-          /* Standard Animations */
           @keyframes float {
             0% { transform: translateY(0px); }
             50% { transform: translateY(-10px); }
@@ -23,8 +22,6 @@ function LoginPage({ handleLogin }) {
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
           }
-          
-          /* LED SPIN ANIMATION */
           @keyframes spin-slow {
             from { transform: translate(-50%, -50%) rotate(0deg); }
             to { transform: translate(-50%, -50%) rotate(360deg); }
@@ -36,16 +33,13 @@ function LoginPage({ handleLogin }) {
             background-size: 200% 200%; 
             animation: backgroundMove 15s ease infinite; 
           }
-          
-          /* Class para sa nagtuyok nga suga */
           .animate-led-spin {
             position: absolute;
             top: 50%;
             left: 50%;
-            width: 200%; /* Kinahanglan dako ni para dili makita ang edges inig tuyok */
+            width: 200%; 
             height: 200%;
             animation: spin-slow 4s linear infinite;
-            /* Ang suga: Transparent -> Emerald/Green (PGAS Color) */
             background: conic-gradient(transparent, transparent, transparent, #34d399, #10b981); 
           }
         `}
@@ -54,7 +48,7 @@ function LoginPage({ handleLogin }) {
       {/* --- MAIN PAGE --- */}
       <div className="relative flex flex-col items-center justify-center min-h-screen overflow-hidden text-white bg-gray-900 font-sans">
         
-        {/* Animated Background Gradients */}
+        {/* Animated Background */}
         <div className="absolute top-0 left-0 w-full h-full animate-bg-gradient bg-gradient-to-br from-gray-900 via-indigo-950 to-gray-900 z-0"></div>
         
         {/* Blobs */}
@@ -62,41 +56,28 @@ function LoginPage({ handleLogin }) {
         <div className="absolute bottom-10 right-10 w-72 h-72 bg-emerald-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float" style={{ animationDelay: '2s' }}></div>
         
         {/* --- LOGIN CARD WRAPPER --- */}
-        {/* Relative container para sa card ug sa LED border */}
         <div className="relative w-full max-w-md p-[2px] rounded-3xl animate-fade-in-up z-10 overflow-hidden">
             
-            {/* 1. THE ROTATING LED (Behind the card) */}
+            {/* ROTATING LED */}
             <div className="animate-led-spin"></div>
 
-            {/* 2. THE CARD CONTENT (On top of the LED) */}
-            {/* bg-gray-900 ensures the middle of the LED is covered, leaving only the border visible */}
+            {/* CARD CONTENT */}
             <div className="relative w-full h-full bg-gray-900/90 backdrop-blur-xl border border-gray-700/30 rounded-3xl p-8 shadow-2xl">
               
-              {/* Top Decorative Line (Static) */}
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500 via-indigo-500 to-purple-500 opacity-50"></div>
               
               <div className="flex flex-col items-center">
                 
-                {/* Header Text */}
+                {/* Header */}
                 <span className="text-[10px] font-bold tracking-[0.3em] text-gray-400 uppercase mb-8 text-center">
                   Provincial Government of Agusan del Sur
                 </span>
 
-                {/* --- DUAL LOGO SECTION --- */}
-                <div className="flex items-center justify-center gap-6 mb-8">
-                    {/* PGAS LOGO */}
+                {/* PGAS LOGO */}
+                <div className="flex items-center justify-center mb-6">
                     <div className="relative group/logo">
-                        <div className="absolute -inset-2 bg-emerald-500/20 rounded-full blur-lg opacity-0 group-hover/logo:opacity-100 transition duration-500"></div>
-                        <img src={PgasLogo} alt="PGAS Logo" className="relative w-20 h-20 object-contain drop-shadow-2xl transition-transform duration-300 hover:scale-110" />
-                    </div>
-
-                    {/* Divider */}
-                    <div className="h-12 w-px bg-gray-600 opacity-50"></div>
-
-                    {/* PIMO LOGO */}
-                    <div className="relative group/logo">
-                        <div className="absolute -inset-2 bg-indigo-500/20 rounded-full blur-lg opacity-0 group-hover/logo:opacity-100 transition duration-500"></div>
-                        <img src={PimoLogo} alt="PIMO Logo" className="relative w-20 h-20 object-contain drop-shadow-2xl transition-transform duration-300 hover:scale-110" />
+                        <div className="absolute -inset-4 bg-emerald-500/20 rounded-full blur-xl opacity-0 group-hover/logo:opacity-100 transition duration-500"></div>
+                        <img src={PgasLogo} alt="PGAS Logo" className="relative w-24 h-24 object-contain drop-shadow-2xl transition-transform duration-300 hover:scale-110" />
                     </div>
                 </div>
 
@@ -106,39 +87,63 @@ function LoginPage({ handleLogin }) {
                         PGAS Info Bot
                     </h1>
                     <p className="text-emerald-400 font-medium tracking-wide text-sm">
-                        Smart PIMO Assistant
+                        Official AI Assistant
                     </p>
                 </div>
 
-                {/* Button */}
-                <button
-                    onClick={handleLogin}
-                    className="group relative w-full py-4 mb-8 overflow-hidden rounded-xl bg-gradient-to-r from-indigo-600 to-emerald-600 font-bold text-white shadow-lg transition-all duration-300 hover:scale-[1.02] hover:shadow-emerald-500/20"
-                >
-                    <div className="absolute inset-0 w-full h-full bg-white/20 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]"></div>
-                    <span className="relative flex items-center justify-center gap-2">
-                        Start Conversation
-                        <svg className="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
-                    </span>
-                </button>
-
-                {/* Footer Divider */}
-                <div className="relative w-full flex items-center justify-center mb-6">
-                    <div className="absolute inset-0 flex items-center">
-                        <div className="w-full border-t border-gray-600/50"></div>
-                    </div>
-                    <span className="relative z-10 bg-gray-800 px-4 text-xs text-gray-500 uppercase tracking-widest rounded">
-                        Integrated Systems
-                    </span>
+                {/* GOOGLE SIGN IN BUTTON */}
+                <div className="mb-8">
+                  <GoogleLogin
+                    onSuccess={onLoginSuccess}
+                    onError={() => {
+                      console.log('Login Failed');
+                    }}
+                  />
                 </div>
+                
 
-                {/* Badges */}
-                <div className="flex flex-wrap justify-center gap-3 w-full">
-                    {['HRIS', 'SPMS', 'DGSIGN'].map((system) => (
-                        <span key={system} className="px-4 py-1.5 text-xs font-semibold text-gray-400 bg-gray-800 rounded-full border border-gray-700 hover:bg-gray-700 hover:text-white hover:border-emerald-500/50 cursor-pointer transition-all duration-300">
-                            {system}
-                        </span>
-                    ))}
+                {/* --- BAG-ONG SECTION: WHAT CAN I DO? --- */}
+                <div className="w-full">
+                    <div className="flex items-center gap-2 mb-4">
+                        <div className="h-px flex-1 bg-gray-700"></div>
+                        <span className="text-xs text-gray-500 uppercase tracking-widest font-semibold">I can help you with</span>
+                        <div className="h-px flex-1 bg-gray-700"></div>
+                    </div>
+
+                    <div className="space-y-3">
+                        {/* Item 1 */}
+                        <div className="flex items-center gap-3 p-3 bg-gray-800/50 rounded-lg border border-gray-700/50 hover:bg-gray-800 transition-colors">
+                            <div className="p-2 bg-emerald-500/10 rounded-full text-emerald-400">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                            </div>
+                            <div className="flex-1">
+                                <h3 className="text-sm font-semibold text-gray-200">Instant System Support</h3>
+                                <p className="text-[10px] text-gray-500">Login issues, Account resets</p>
+                            </div>
+                        </div>
+
+                        {/* Item 2 */}
+                        <div className="flex items-center gap-3 p-3 bg-gray-800/50 rounded-lg border border-gray-700/50 hover:bg-gray-800 transition-colors">
+                             <div className="p-2 bg-blue-500/10 rounded-full text-blue-400">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
+                            </div>
+                            <div className="flex-1">
+                                <h3 className="text-sm font-semibold text-gray-200">Navigation Guide</h3>
+                                <p className="text-[10px] text-gray-500">Locate HRIS, SPMS, & DGSIGN</p>
+                            </div>
+                        </div>
+
+                        {/* Item 3 */}
+                        <div className="flex items-center gap-3 p-3 bg-gray-800/50 rounded-lg border border-gray-700/50 hover:bg-gray-800 transition-colors">
+                             <div className="p-2 bg-purple-500/10 rounded-full text-purple-400">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            </div>
+                            <div className="flex-1">
+                                <h3 className="text-sm font-semibold text-gray-200">24/7 Automated Assistance</h3>
+                                <p className="text-[10px] text-gray-500">Always available to help</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
               </div>

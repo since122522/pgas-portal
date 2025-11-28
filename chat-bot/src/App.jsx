@@ -1,24 +1,30 @@
 import { useState } from 'react';
+// Run: npm install jwt-decode
+import { jwtDecode } from "jwt-decode";
 import LoginPage from './components/LoginPage';
 import Chat from './components/Chat';
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState(null);
 
-  const handleLogin = () => {
-    setIsLoggedIn(true);
+  const handleLoginSuccess = (credentialResponse) => {
+    console.log("Credential Response:", credentialResponse);
+    const decoded = jwtDecode(credentialResponse.credential);
+    console.log("Decoded User:", decoded);
+    setUser(decoded); // Save the decoded user info
   };
 
   const handleLogout = () => {
-    setIsLoggedIn(false);
+    setUser(null); // Clear user to return to Login
   };
 
   return (
-    <div>
-      {!isLoggedIn ? (
-        <LoginPage handleLogin={handleLogin} />
+    <div className="font-sans">
+      {!user ? (
+        <LoginPage onLoginSuccess={handleLoginSuccess} />
       ) : (
-        <Chat handleLogout={handleLogout} />
+        // Pass the full user object to the Chat component
+        <Chat user={user} handleLogout={handleLogout} />
       )}
     </div>
   );
