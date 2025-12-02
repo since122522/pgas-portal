@@ -1,31 +1,44 @@
 import { useState } from 'react';
-// Run: npm install jwt-decode
 import { jwtDecode } from "jwt-decode";
-import LoginPage from './components/LoginPage';
-import Chat from './components/Chat';
+import LandingPage from './components/LandingPage';
+import HrisLoginPage from './components/HrisLoginPage';
+import HrisChat from './components/HrisChat';
+import './App.css';
 
 function App() {
   const [user, setUser] = useState(null);
+  const [currentPage, setCurrentPage] = useState('landing'); // 'landing', 'hris-login', 'hris-chat'
 
   const handleLoginSuccess = (credentialResponse) => {
     console.log("Credential Response:", credentialResponse);
     const decoded = jwtDecode(credentialResponse.credential);
     console.log("Decoded User:", decoded);
-    setUser(decoded); // Save the decoded user info
+    setUser(decoded);
+    setCurrentPage('hris-chat');
   };
 
   const handleLogout = () => {
-    setUser(null); // Clear user to return to Login
+    setUser(null);
+    setCurrentPage('landing');
+  };
+
+  const navigateTo = (page) => {
+    setCurrentPage(page);
+  };
+
+  const renderPage = () => {
+    if (currentPage === 'hris-chat' && user) {
+      return <HrisChat user={user} handleLogout={handleLogout} webhookUrl="https://workflow.pgas.ph/webhook/5a3b20a5-4c7d-4c16-811b-fdd13bbf3f3f/chat" />;
+    }
+    if (currentPage === 'hris-login') {
+      return <HrisLoginPage onLoginSuccess={handleLoginSuccess} />;
+    }
+    return <LandingPage navigateTo={navigateTo} />;
   };
 
   return (
     <div className="font-sans">
-      {!user ? (
-        <LoginPage onLoginSuccess={handleLoginSuccess} />
-      ) : (
-        // Pass the full user object to the Chat component
-        <Chat user={user} handleLogout={handleLogout} />
-      )}
+      {renderPage()}
     </div>
   );
 }

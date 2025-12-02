@@ -1,8 +1,19 @@
 import React from 'react';
-import { GoogleLogin } from '@react-oauth/google';
 import PgasLogo from '../assets/pgas.png'; 
+import HrisLogo from '../assets/hris.png';
+import SpmsLogo from '../assets/pimo.png';
+import DgsignLogo from '../assets/pgas.png'; 
 
-function LoginPage({ onLoginSuccess }) {
+function LandingPage({ navigateTo }) {
+  const handleLogin = (system) => {
+    if (system === 'HRIS') {
+      navigateTo('hris-login');
+    } else {
+      console.log(`Login attempt for ${system}`);
+      // Handle other systems if needed
+    }
+  };
+
   return (
     <>
       {/* --- CSS ANIMATIONS --- */}
@@ -26,6 +37,10 @@ function LoginPage({ onLoginSuccess }) {
             from { transform: translate(-50%, -50%) rotate(0deg); }
             to { transform: translate(-50%, -50%) rotate(360deg); }
           }
+          @keyframes title-pulse {
+            0%, 100% { text-shadow: 0 0 5px rgba(255, 255, 255, 0.3); }
+            50% { text-shadow: 0 0 20px rgba(255, 255, 255, 0.7); }
+          }
 
           .animate-float { animation: float 6s ease-in-out infinite; }
           .animate-fade-in-up { animation: fadeInUp 0.8s ease-out forwards; }
@@ -41,6 +56,15 @@ function LoginPage({ onLoginSuccess }) {
             height: 200%;
             animation: spin-slow 4s linear infinite;
             background: conic-gradient(transparent, transparent, transparent, #34d399, #10b981); 
+          }
+          .animate-title-pulse {
+            animation: title-pulse 5s ease-in-out infinite;
+          }
+          .card-glow {
+            transition: box-shadow 0.3s ease-in-out;
+          }
+          .card-glow:hover {
+            box-shadow: 0 0 25px rgba(52, 211, 153, 0.5);
           }
         `}
       </style>
@@ -83,7 +107,7 @@ function LoginPage({ onLoginSuccess }) {
 
                 {/* Titles */}
                 <div className="text-center mb-8 space-y-1">
-                    <h1 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-gray-200 to-gray-400 tracking-tight">
+                    <h1 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-gray-200 to-gray-400 tracking-tight animate-title-pulse">
                         PGAS Info Bot
                     </h1>
                     <p className="text-emerald-400 font-medium tracking-wide text-sm">
@@ -91,57 +115,40 @@ function LoginPage({ onLoginSuccess }) {
                     </p>
                 </div>
 
-                {/* GOOGLE SIGN IN BUTTON */}
-                <div className="mb-8">
-                  <GoogleLogin
-                    onSuccess={onLoginSuccess}
-                    onError={() => {
-                      console.log('Login Failed');
-                    }}
-                  />
-                </div>
-                
-
-                {/* --- BAG-ONG SECTION: WHAT CAN I DO? --- */}
-                <div className="w-full">
-                    <div className="flex items-center gap-2 mb-4">
+                {/* --- System Selection --- */}
+                <div className="w-full mt-8">
+                    <div className="flex items-center gap-2 mb-6">
                         <div className="h-px flex-1 bg-gray-700"></div>
-                        <span className="text-xs text-gray-500 uppercase tracking-widest font-semibold">I can help you with</span>
+                        <span className="text-xs text-gray-500 uppercase tracking-widest font-semibold">Select a System</span>
                         <div className="h-px flex-1 bg-gray-700"></div>
                     </div>
-
-                    <div className="space-y-3">
-                        {/* Item 1 */}
-                        <div className="flex items-center gap-3 p-3 bg-gray-800/50 rounded-lg border border-gray-700/50 hover:bg-gray-800 transition-colors">
-                            <div className="p-2 bg-emerald-500/10 rounded-full text-emerald-400">
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                        {/* HRIS Card */}
+                        <div onClick={() => handleLogin('HRIS')} className="card-glow cursor-pointer p-6 bg-gray-800/50 rounded-2xl border border-gray-700/50 hover:bg-gray-800 hover:border-emerald-500/50 transition-all duration-300 transform hover:-translate-y-1 group flex flex-col justify-between">
+                            <div>
+                                <img src={HrisLogo} alt="HRIS Logo" className="w-16 h-16 mx-auto mb-4 object-contain transition-transform duration-300 group-hover:scale-110"/>
+                                <h3 className="font-bold text-lg text-gray-200">HRIS</h3>
+                                <p className="text-xs text-gray-500 mb-4">Human Resource Info System</p>
                             </div>
-                            <div className="flex-1">
-                                <h3 className="text-sm font-semibold text-gray-200">Instant System Support</h3>
-                                <p className="text-[10px] text-gray-500">Login issues, Account resets</p>
-                            </div>
+                            <span className="text-xs font-semibold text-emerald-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300">Proceed to Login &rarr;</span>
                         </div>
-
-                        {/* Item 2 */}
-                        <div className="flex items-center gap-3 p-3 bg-gray-800/50 rounded-lg border border-gray-700/50 hover:bg-gray-800 transition-colors">
-                             <div className="p-2 bg-blue-500/10 rounded-full text-blue-400">
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
+                        {/* SPMS Card */}
+                        <div onClick={() => handleLogin('SPMS')} className="card-glow cursor-pointer p-6 bg-gray-800/50 rounded-2xl border border-gray-700/50 hover:bg-gray-800 hover:border-emerald-500/50 transition-all duration-300 transform hover:-translate-y-1 group flex flex-col justify-between">
+                            <div>
+                                <img src={SpmsLogo} alt="SPMS Logo" className="w-16 h-16 mx-auto mb-4 object-contain transition-transform duration-300 group-hover:scale-110"/>
+                                <h3 className="font-bold text-lg text-gray-200">SPMS</h3>
+                                <p className="text-xs text-gray-500 mb-4">Strategic Performance Mgt. System</p>
                             </div>
-                            <div className="flex-1">
-                                <h3 className="text-sm font-semibold text-gray-200">Navigation Guide</h3>
-                                <p className="text-[10px] text-gray-500">Locate HRIS, SPMS, & DGSIGN</p>
-                            </div>
+                            <span className="text-xs font-semibold text-emerald-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300">Proceed to Login &rarr;</span>
                         </div>
-
-                        {/* Item 3 */}
-                        <div className="flex items-center gap-3 p-3 bg-gray-800/50 rounded-lg border border-gray-700/50 hover:bg-gray-800 transition-colors">
-                             <div className="p-2 bg-purple-500/10 rounded-full text-purple-400">
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        {/* DGSIGN Card */}
+                        <div onClick={() => handleLogin('DGSIGN')} className="card-glow cursor-pointer p-6 bg-gray-800/50 rounded-2xl border border-gray-700/50 hover:bg-gray-800 hover:border-emerald-500/50 transition-all duration-300 transform hover:-translate-y-1 group flex flex-col justify-between">
+                            <div>
+                                <img src={DgsignLogo} alt="DGSIGN Logo" className="w-16 h-16 mx-auto mb-4 object-contain transition-transform duration-300 group-hover:scale-110"/>
+                                <h3 className="font-bold text-lg text-gray-200">DGSIGN</h3>
+                                <p className="text-xs text-gray-500 mb-4">Digital Signature</p>
                             </div>
-                            <div className="flex-1">
-                                <h3 className="text-sm font-semibold text-gray-200">24/7 Automated Assistance</h3>
-                                <p className="text-[10px] text-gray-500">Always available to help</p>
-                            </div>
+                            <span className="text-xs font-semibold text-emerald-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300">Proceed to Login &rarr;</span>
                         </div>
                     </div>
                 </div>
@@ -152,7 +159,7 @@ function LoginPage({ onLoginSuccess }) {
 
         {/* Footer */}
         <div className="mt-8 text-gray-500 text-xs font-medium tracking-wide animate-fade-in-up">
-          &copy; 2025 Provincial Government of Agusan del Sur
+          &copy; 2.25 Provincial Government of Agusan del Sur
         </div>
 
       </div>
@@ -160,4 +167,4 @@ function LoginPage({ onLoginSuccess }) {
   );
 }
 
-export default LoginPage;
+export default LandingPage;
