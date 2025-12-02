@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = '';
 
 const useChatManager = (user) => {
     // Stores the list of conversations (id and title)
