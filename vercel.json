@@ -16,11 +16,7 @@
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "/server/server.js"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/chat-bot/dist/$1"
+      "dest": "server/server.js"
     }
   ]
 }
