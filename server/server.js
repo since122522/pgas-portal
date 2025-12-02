@@ -13,7 +13,25 @@ const port = process.env.PORT || 3001;
 // The webhook URL for getting bot replies
 const WEBHOOK_URL = "https://workflow.pgas.ph/webhook/e104e40e-6134-4825-a6f0-8a646d882662/chat";
 
-app.use(cors());
+// CORS configuration
+const allowedOrigins = [
+  'https://pgas-chatbot.vercel.app',
+  'https://since122522-pgas-portal-fwti.vercel.app',
+  'http://localhost:5173'
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  }
+}));
+
 app.use(bodyParser.json());
 
 mongoose.connect(process.env.MONGODB_URI);
