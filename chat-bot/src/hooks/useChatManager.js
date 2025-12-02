@@ -1,121 +1,123 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
-const generateId = () => Math.random().toString(36).substr(2, 9);
+const API_URL = import.meta.env.VITE_API_URL;
 
-const WEBHOOK_URL = import.meta.env.VITE_WEBHOOK_URL || "https://workflow.pgas.ph/webhook/e104e40e-6134-4825-a6f0-8a646d882662/chat";
+const useChatManager = (user) => {
+    // Stores the list of conversations (id and title)
+    const [conversations, setConversations] = useState([]);
+    // Stores the currently active chat, including all messages
+    const [activeConversation, setActiveConversation] = useState(null);
+    const [isLoading, setIsLoading] = useState(true); // Initial load
+    const [isReplying, setIsReplying] = useState(false); // For bot replies
 
-const useChatManager = () => {
-    const [conversations, setConversations] = useState(() => {
-        try {
-            const savedConversations = localStorage.getItem('chatConversations');
-            if (savedConversations) {
-                const parsed = JSON.parse(savedConversations);
-                // Basic validation
-                if (Array.isArray(parsed) && parsed.length > 0) {
-                    return parsed;
+    const userId = user?.sub; // Using Google's 'sub' as the unique user ID
+
+    // Fetch initial data (recent chats)
+    useEffect(() => {
+        if (!userId) {
+            setIsLoading(false);
+            return;
+        };
+
+        const fetchInitialData = async () => {
+            setIsLoading(true);
+            try {
+                const response = await fetch(`${API_URL}/api/chat/recent/${userId}`);
+                if (!response.ok) throw new Error('Failed to fetch recent chats');
+                
+                const recentChats = await response.json();
+                setConversations(recentChats);
+
+                // If there are recent chats, load the most recent one
+                if (recentChats.length > 0) {
+                    await switchConversation(recentChats[0].id);
                 }
+            } catch (error) {
+                console.error("Error fetching initial data:", error);
+                // Handle error state if needed
+            } finally {
+                setIsLoading(false);
             }
-        } catch (error) {
-            console.error("Failed to load conversations from localStorage", error);
-        }
-        // Return default if nothing in localStorage or if parsing fails
-        const initialConversationId = generateId();
-        return [{ 
-            id: initialConversationId, 
-            title: 'New Chat', 
-            messages: [] 
-        }];
-    });
+        };
 
-    const [activeConversationId, setActiveConversationId] = useState(() => {
-        const savedActiveId = localStorage.getItem('activeChatId');
-        const initialConversation = conversations[0];
-        return savedActiveId || initialConversation.id;
-    });
-    
-    const [isLoading, setIsLoading] = useState(false);
-
-    // Persist to localStorage whenever conversations or active ID change
-    useState(() => {
-        try {
-            localStorage.setItem('chatConversations', JSON.stringify(conversations));
-            localStorage.setItem('activeChatId', activeConversationId);
-        } catch (error) {
-            console.error("Failed to save conversations to localStorage", error);
-        }
-    }, [conversations, activeConversationId]);
-
-    const getActiveConversation = () => {
-        return conversations.find(c => c.id === activeConversationId) || conversations[0];
-    };
+        fetchInitialData();
+    }, [userId]);
 
     const handleSendMessage = async (input) => {
-        if (!input.trim()) return;
+        if (!input.trim() || !userId) return;
 
-        const userMessage = { text: input, sender: 'user', id: generateId() };
-        
-        // Update the state for the active conversation
-        const updatedConversations = conversations.map(c => 
-            c.id === activeConversationId
-                ? { ...c, messages: [...c.messages, userMessage] }
-                : c
-        );
-        setConversations(updatedConversations);
-        setIsLoading(true);
+        setIsReplying(true);
+
+        const currentChatId = activeConversation?._id;
+
+        // Optimistically update UI with user message
+        const userMessage = { sender: 'user', text: input, _id: Date.now().toString() };
+        if (activeConversation) {
+            setActiveConversation(prev => ({ ...prev, messages: [...prev.messages, userMessage] }));
+        } else {
+            setActiveConversation({ messages: [userMessage], title: 'New Chat' });
+        }
+
 
         try {
-            const response = await fetch(WEBHOOK_URL, {
+            const response = await fetch(`${API_URL}/api/chat/message`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: input, chatId: activeConversationId }),
+                body: JSON.stringify({
+                    userId,
+                    text: input,
+                    chatId: currentChatId,
+                }),
             });
 
-            if (!response.ok) throw new Error('Network response was not ok');
+            if (!response.ok) throw new Error('Failed to send message');
 
-            const data = await response.json();
-            const botResponseText = data.output || data.text || data.response || data.message || JSON.stringify(data);
-            const botMessage = { text: botResponseText, sender: 'bot', id: generateId() };
+            const updatedChat = await response.json();
+            
+            // Update the entire active conversation with the authoritative server response
+            setActiveConversation(updatedChat);
 
-            const finalConversations = updatedConversations.map(c => 
-                c.id === activeConversationId
-                    ? { ...c, messages: [...c.messages, botMessage] }
-                    : c
-            );
-            setConversations(finalConversations);
+            // Also, update the title in the conversation list if it's a new chat
+            setConversations(prev => {
+                const chatExists = prev.some(c => c.id === updatedChat._id);
+                if (!chatExists) {
+                    return [{ id: updatedChat._id, title: updatedChat.title }, ...prev];
+                }
+                return prev;
+            });
 
         } catch (error) {
-            console.error('Webhook Error:', error);
-            const errorMessage = { text: "Pasensya, naay problema sa connection sa server.", sender: 'bot', id: uuidv4() };
-            const errorConversations = updatedConversations.map(c => 
-                c.id === activeConversationId
-                    ? { ...c, messages: [...c.messages, errorMessage] }
-                    : c
-            );
-            setConversations(errorConversations);
+            console.error('Send Message Error:', error);
+            // Optionally, add an error message to the chat
+        } finally {
+            setIsReplying(false);
+        }
+    };
+    
+    const createNewChat = () => {
+        setActiveConversation(null); // Set to null to indicate a new chat
+    };
+    
+    const switchConversation = useCallback(async (id) => {
+        if (!id) return;
+        setIsLoading(true);
+        try {
+            const response = await fetch(`${API_URL}/api/chat/${id}`);
+            if (!response.ok) throw new Error('Failed to fetch conversation');
+            const chatData = await response.json();
+            setActiveConversation(chatData);
+        } catch (error) {
+            console.error("Error switching conversation:", error);
         } finally {
             setIsLoading(false);
         }
-    };
-
-    const createNewChat = () => {
-        const newId = uuidv4();
-        const newConversation = {
-            id: newId,
-            title: 'New Chat',
-            messages: [],
-        };
-        setConversations(prev => [newConversation, ...prev]);
-        setActiveConversationId(newId);
-    };
-
-    const switchConversation = (id) => {
-        setActiveConversationId(id);
-    };
+    }, []);
 
     return {
         conversations,
-        activeConversation: getActiveConversation(),
+        activeConversation,
         isLoading,
+        isReplying,
         handleSendMessage,
         createNewChat,
         switchConversation,

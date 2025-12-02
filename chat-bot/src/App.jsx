@@ -28,7 +28,7 @@ function App() {
 
   const renderPage = () => {
     if (currentPage === 'hris-chat' && user) {
-      return <HrisChat user={user} handleLogout={handleLogout} webhookUrl="https://workflow.pgas.ph/webhook/5a3b20a5-4c7d-4c16-811b-fdd13bbf3f3f/chat" />;
+      return <HrisChat user={user} handleLogout={handleLogout} />;
     }
     if (currentPage === 'hris-login') {
       return <HrisLoginPage onLoginSuccess={handleLoginSuccess} />;
