@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 
-const API_URL = '';
+const API_URL = import.meta.env.VITE_API_URL;
 
 const useChatManager = (user) => {
     // Stores the list of conversations (id and title)
@@ -113,6 +113,29 @@ const useChatManager = (user) => {
         }
     }, []);
 
+    const handleDeleteChat = async (chatId) => {
+        try {
+          const response = await fetch(`${API_URL}/api/chat/${chatId}`, {
+            method: 'DELETE',
+          });
+      
+          if (!response.ok) {
+            throw new Error('Failed to delete chat');
+          }
+      
+          // Update conversations list
+          setConversations(prev => prev.filter(c => c.id !== chatId));
+      
+          // If the deleted chat was the active one, clear the active conversation
+          if (activeConversation?._id === chatId) {
+            setActiveConversation(null);
+          }
+      
+        } catch (error) {
+          console.error('Error deleting chat:', error);
+        }
+      };
+
     return {
         conversations,
         activeConversation,
@@ -121,6 +144,7 @@ const useChatManager = (user) => {
         handleSendMessage,
         createNewChat,
         switchConversation,
+        handleDeleteChat,
     };
 };
 

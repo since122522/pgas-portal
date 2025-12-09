@@ -11,27 +11,9 @@ const app = express();
 const port = process.env.PORT || 3001;
 
 // The webhook URL for getting bot replies
-const WEBHOOK_URL = "https://workflow.pgas.ph/webhook/e104e40e-6134-4825-a6f0-8a646d882662/chat";
+const WEBHOOK_URL = "https://workflow.pgas.ph/webhook/5a3b20a5-4c7d-4c16-811b-fdd13bbf3f3f/chat";
 
-// CORS configuration
-const allowedOrigins = [
-  'https://pgas-chatbot.vercel.app',
-  'https://since122522-pgas-portal-fwti.vercel.app',
-  'http://localhost:5173'
-];
-
-app.use(cors({
-  origin: function (origin, callback) {
-    // allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) === -1) {
-      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-      return callback(new Error(msg), false);
-    }
-    return callback(null, true);
-  }
-}));
-
+app.use(cors());
 app.use(bodyParser.json());
 
 mongoose.connect(process.env.MONGODB_URI);
@@ -52,6 +34,20 @@ app.get('/api/chat/:chatId', async (req, res) => {
     } else {
       res.status(404).json({ message: 'Chat not found' });
     }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Delete a chat by ID
+app.delete('/api/chat/:chatId', async (req, res) => {
+  try {
+    const { chatId } = req.params;
+    const deletedChat = await Chat.findByIdAndDelete(chatId);
+    if (!deletedChat) {
+      return res.status(404).json({ message: 'Chat not found' });
+    }
+    res.status(200).json({ message: 'Chat deleted successfully', deletedChatId: chatId });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -126,9 +122,6 @@ app.post('/api/chat/message', async (req, res) => {
   }
 });
 
-
 app.listen(port, () => {
   console.log(`Server is running on port: ${port}`);
 });
-
-module.exports = app;
